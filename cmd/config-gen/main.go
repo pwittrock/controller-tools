@@ -18,24 +18,17 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
-	"sigs.k8s.io/controller-tools/cmd/controller-gen/cmd"
+	"github.com/spf13/cobra"
+	"sigs.k8s.io/controller-tools/cmd/config-gen/apis/v1alpha1"
 )
 
-//go:generate go run ../helpgen/main.go paths=../../pkg/... generate:headerFile=../../boilerplate.go.txt,year=2019
-
 func main() {
-	c := cmd.New()
-
-	if err := c.Execute(); err != nil {
-		if _, noUsage := err.(cmd.NoUsageError); !noUsage {
-			// print the usage unless we suppressed it
-			if err := c.Usage(); err != nil {
-				panic(err)
-			}
-		}
-		fmt.Fprintf(c.OutOrStderr(), "run `%[1]s %[2]s -w` to see all available markers, or `%[1]s %[2]s -h` for usage\n", c.CalledAs(), strings.Join(os.Args[1:], " "))
+	cmd := v1alpha1.NewCommand()
+	cmd.Use = "config-gen [CONFIG_FILE] [INPUTS]"
+	cmd.Args = cobra.MinimumNArgs(0)
+	if err := cmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "\n%v\n", err)
 		os.Exit(1)
 	}
 }
